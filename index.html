@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Sedimentasi Pond</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+        }
+        .formula {
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kalkulator Kebutuhan Luas Sedimentasi Pond</h1>
+    
+    <div class="formula">
+        <strong>Rumus:</strong> A = (Q × T) / (C × η)<br>
+        Dimana:<br>
+        A = Luas area sedimentasi (m²)<br>
+        Q = Debit aliran (m³/hari)<br>
+        T = Waktu tinggal (hari)<br>
+        C = Kapasitas pengendapan (kg/m²/hari)<br>
+        η = Efisiensi pengendapan (0-1)
+    </div>
+    
+    <div class="form-group">
+        <label for="debit">Debit Aliran (Q) - m³/hari</label>
+        <input type="number" id="debit" step="any" placeholder="Contoh: 1000">
+    </div>
+    
+    <div class="form-group">
+        <label for="waktu">Waktu Tinggal (T) - hari</label>
+        <input type="number" id="waktu" step="any" placeholder="Contoh: 2">
+    </div>
+    
+    <div class="form-group">
+        <label for="kapasitas">Kapasitas Pengendapan (C) - kg/m²/hari</label>
+        <input type="number" id="kapasitas" step="any" placeholder="Contoh: 30">
+    </div>
+    
+    <div class="form-group">
+        <label for="efisiensi">Efisiensi Pengendapan (η) - 0 sampai 1</label>
+        <input type="number" id="efisiensi" step="0.01" min="0" max="1" placeholder="Contoh: 0.85">
+    </div>
+    
+    <button onclick="hitungLuas()">Hitung Luas Sedimentasi</button>
+    
+    <div id="hasil" class="result" style="display: none;">
+        <h3>Hasil Perhitungan:</h3>
+        <p id="luas"></p>
+        <p id="detail"></p>
+    </div>
+    
+    <footer>
+        Kalkulator Sedimentasi Pond &copy; 2023 - Untuk keperluan teknis sedimentasi
+    </footer>
+
+    <script>
+        function hitungLuas() {
+            // Ambil nilai input
+            const Q = parseFloat(document.getElementById('debit').value);
+            const T = parseFloat(document.getElementById('waktu').value);
+            const C = parseFloat(document.getElementById('kapasitas').value);
+            const η = parseFloat(document.getElementById('efisiensi').value);
+            
+            // Validasi input
+            if (isNaN(Q) || isNaN(T) || isNaN(C) || isNaN(η) || η <= 0 || η > 1) {
+                alert("Harap isi semua parameter dengan benar!\nEfisiensi harus antara 0 dan 1.");
+                return;
+            }
+            
+            // Hitung luas
+            const A = (Q * T) / (C * η);
+            
+            // Tampilkan hasil
+            document.getElementById('luas').innerHTML = `<strong>Luas sedimentasi yang dibutuhkan:</strong> ${A.toFixed(2)} m²`;
+            
+            document.getElementById('detail').innerHTML = `
+                Detail perhitungan:<br>
+                (${Q} × ${T}) / (${C} × ${η}) = ${A.toFixed(2)} m²
+            `;
+            
+            document.getElementById('hasil').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
