@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Luas Sedimentasi Pond</title>
+    <title>Sediment Pond Design Calculator</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
             line-height: 1.6;
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             color: #333;
-            background-color: #f5f7fa;
+            background-color: #f9f9f9;
         }
         h1 {
             color: #2c3e50;
@@ -25,7 +25,7 @@
             background-color: white;
             padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
         }
         .form-group {
             margin-bottom: 20px;
@@ -39,16 +39,16 @@
         .input-unit {
             display: flex;
             align-items: center;
+            gap: 10px;
         }
-        .input-unit input {
+        input {
             flex: 1;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
         }
-        .input-unit span {
-            margin-left: 10px;
+        .unit {
             color: #7f8c8d;
             min-width: 60px;
         }
@@ -61,18 +61,21 @@
             cursor: pointer;
             font-size: 16px;
             width: 100%;
-            margin-top: 10px;
+            margin: 20px 0;
             transition: background-color 0.3s;
         }
         button:hover {
             background-color: #2980b9;
         }
-        .result {
+        .result-section {
             margin-top: 30px;
+        }
+        .result-card {
             padding: 20px;
             background-color: #e8f4fc;
             border-radius: 4px;
             border-left: 4px solid #3498db;
+            margin-bottom: 20px;
         }
         .result-value {
             font-size: 24px;
@@ -81,16 +84,25 @@
             margin: 10px 0;
         }
         .parameter-info {
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 4px;
             margin-top: 30px;
             font-size: 14px;
-            color: #7f8c8d;
         }
         .parameter-info h3 {
             color: #2c3e50;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #d6e9f7;
             padding-bottom: 5px;
         }
-        @media (max-width: 480px) {
+        .formula {
+            font-family: monospace;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        @media (max-width: 600px) {
             body {
                 padding: 15px;
             }
@@ -102,74 +114,100 @@
 </head>
 <body>
     <div class="calculator-container">
-        <h1>Kalkulator Luas Sedimentasi Pond</h1>
+        <h1>Sediment Pond Design Calculator</h1>
         
         <div class="form-group">
-            <label for="debit">Debit Maksimum (Q)</label>
+            <label for="max-flow">Maximum Flow Rate (Q<sub>max</sub>)</label>
             <div class="input-unit">
-                <input type="number" id="debit" step="0.01" placeholder="Contoh: 2.5">
-                <span>m³/detik</span>
+                <input type="number" id="max-flow" step="0.01" placeholder="0.5">
+                <span class="unit">m³/s</span>
             </div>
         </div>
         
         <div class="form-group">
-            <label for="velocity">Kecepatan Pengendapan (Vs)</label>
+            <label for="settling-vel">Settling Velocity (V<sub>s</sub>)</label>
             <div class="input-unit">
-                <input type="number" id="velocity" step="0.0001" placeholder="Contoh: 0.0012">
-                <span>m/detik</span>
+                <input type="number" id="settling-vel" step="0.0001" placeholder="0.0012">
+                <span class="unit">m/s</span>
             </div>
         </div>
         
-        <button onclick="hitungLuas()">Hitung Luas Pond</button>
-        
-        <div id="hasil" class="result" style="display: none;">
-            <h3>Hasil Perhitungan</h3>
-            <div>
-                <strong>Luas Pond:</strong>
-                <div class="result-value" id="luas-m2"></div>
-                <div class="result-value" id="luas-ha"></div>
+        <div class="form-group">
+            <label for="pond-depth">Pond Depth (d)</label>
+            <div class="input-unit">
+                <input type="number" id="pond-depth" value="3" step="0.1" min="0.1">
+                <span class="unit">meters</span>
             </div>
-            <div id="detail-perhitungan" style="margin-top: 15px;"></div>
+        </div>
+        
+        <button onclick="calculatePond()">Calculate Pond Requirements</button>
+        
+        <div class="result-section">
+            <div class="result-card">
+                <h3>Surface Area Requirements</h3>
+                <div class="formula">A = Q<sub>max</sub> / V<sub>s</sub></div>
+                <div>
+                    <strong>Required Surface Area:</strong>
+                    <div class="result-value" id="surface-area-m2">-</div>
+                    <div class="result-value" id="surface-area-ha">-</div>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <h3>Pond Filling Time</h3>
+                <div class="formula">T = (A × d) / Q<sub>max</sub></div>
+                <div>
+                    <strong>Time to Fill:</strong>
+                    <div class="result-value" id="fill-time-days">-</div>
+                </div>
+            </div>
         </div>
         
         <div class="parameter-info">
-            <h3>Informasi Parameter</h3>
-            <p><strong>Debit Maksimum (Q):</strong> Debit puncak aliran air yang masuk ke kolam sedimentasi dalam satuan m³/detik.</p>
-            <p><strong>Kecepatan Pengendapan (Vs):</strong> Kecepatan turunnya partikel sedimen dalam air (m/detik). Nilai umum:</p>
+            <h3>Parameter Definitions</h3>
+            <p><strong>Maximum Flow Rate (Q<sub>max</sub>):</strong> Peak stormwater runoff rate entering the pond (m³/s). Typical values range from 0.1-5 m³/s depending on catchment size.</p>
+            
+            <p><strong>Settling Velocity (V<sub>s</sub>):</strong> The speed at which sediment particles settle in water (m/s). Common values:</p>
             <ul>
-                <li>Pasir kasar: 0.01 - 0.05 m/detik</li>
-                <li>Pasir halus: 0.001 - 0.01 m/detik</li>
-                <li>Lumpur: 0.0001 - 0.001 m/detik</li>
+                <li>Sand (0.1-1 mm): 0.01-0.1 m/s</li>
+                <li>Silt (0.002-0.05 mm): 0.0001-0.001 m/s</li>
+                <li>Clay (<0.002 mm): <0.0001 m/s</li>
             </ul>
+            
+            <p><strong>Pond Depth (d):</strong> Design depth of sediment pond (typically 2-4 meters). Shallower depths improve settling but require more area.</p>
         </div>
     </div>
 
     <script>
-        function hitungLuas() {
-            // Ambil nilai input
-            const Q = parseFloat(document.getElementById('debit').value);
-            const Vs = parseFloat(document.getElementById('velocity').value);
+        function calculatePond() {
+            // Get input values
+            const Q = parseFloat(document.getElementById('max-flow').value);
+            const Vs = parseFloat(document.getElementById('settling-vel').value);
+            const d = parseFloat(document.getElementById('pond-depth').value);
             
-            // Validasi input
-            if (isNaN(Q) || isNaN(Vs) || Q <= 0 || Vs <= 0) {
-                alert("Harap masukkan nilai yang valid untuk semua parameter!");
+            // Validate inputs
+            if (isNaN(Q) || isNaN(Vs) || isNaN(d) || Q <= 0 || Vs <= 0 || d <= 0) {
+                alert("Please enter valid positive numbers for all parameters");
                 return;
             }
             
-            // Hitung luas berdasarkan rumus A = Q / Vs
-            const luas_m2 = Q / Vs;
-            const luas_ha = luas_m2 / 10000;
+            // Calculate surface area (A = Q/Vs)
+            const A = Q / Vs;
+            const A_ha = A / 10000;
             
-            // Tampilkan hasil
-            document.getElementById('luas-m2').innerHTML = `${luas_m2.toLocaleString('id-ID', {maximumFractionDigits: 2})} m²`;
-            document.getElementById('luas-ha').innerHTML = `${luas_ha.toLocaleString('id-ID', {maximumFractionDigits: 4})} hektar`;
+            // Calculate filling time in seconds (T = (A*d)/Q)
+            const T_seconds = (A * d) / Q;
+            const T_days = T_seconds / 86400;
             
-            document.getElementById('detail-perhitungan').innerHTML = `
-                <strong>Rumus:</strong> A = Q / Vs<br>
-                <strong>Perhitungan:</strong> ${Q} m³/detik ÷ ${Vs} m/detik = ${luas_m2.toLocaleString('id-ID', {maximumFractionDigits: 2})} m²
-            `;
-            
-            document.getElementById('hasil').style.display = 'block';
+            // Display results
+            document.getElementById('surface-area-m2').textContent = 
+                `${A.toLocaleString(undefined, {maximumFractionDigits: 2})} m²`;
+                
+            document.getElementById('surface-area-ha').textContent = 
+                `${A_ha.toLocaleString(undefined, {maximumFractionDigits: 4})} hectares`;
+                
+            document.getElementById('fill-time-days').textContent = 
+                `${T_days.toLocaleString(undefined, {maximumFractionDigits: 2})} days`;
         }
     </script>
 </body>
